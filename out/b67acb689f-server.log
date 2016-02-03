@@ -1,0 +1,12 @@
+VMARGS_PATH="$PWD/server.args" ./_build/default/rel/udpstress/bin/udpstress foreground  -extra server 12000 13000
+
+13:59:30.188 [notice] 1454495370: recv_pkts: 160888 recv_size: 225243200 sent_pkts: 160888 sent_size: 804440 recv: 180.194560 Mbit/s send: 0.643552 Mbit/s
+13:59:40.211 [notice] 1454495380: recv_pkts: 194927 recv_size: 272897800 sent_pkts: 194927 sent_size: 974635 recv: 218.318240 Mbit/s send: 0.779708 Mbit/s
+13:59:50.220 [notice] 1454495390: recv_pkts: 193337 recv_size: 270671800 sent_pkts: 193337 sent_size: 966685 recv: 216.537440 Mbit/s send: 0.773348 Mbit/s
+14:00:00.227 [notice] 1454495400: recv_pkts: 203389 recv_size: 284744600 sent_pkts: 203389 sent_size: 1016945 recv: 227.795680 Mbit/s send: 0.813556 Mbit/s
+14:00:10.231 [notice] 1454495410: recv_pkts: 201306 recv_size: 281828400 sent_pkts: 201306 sent_size: 1006530 recv: 225.462720 Mbit/s send: 0.805224 Mbit/s
+14:00:20.234 [notice] 1454495420: recv_pkts: 197337 recv_size: 276271800 sent_pkts: 197337 sent_size: 986685 recv: 221.017440 Mbit/s send: 0.789348 Mbit/s
+14:00:30.237 [notice] 1454495430: recv_pkts: 202632 recv_size: 283684800 sent_pkts: 202632 sent_size: 1013160 recv: 226.947840 Mbit/s send: 0.810528 Mbit/s
+14:00:40.287 [notice] 1454495440: recv_pkts: 183355 recv_size: 256697000 sent_pkts: 183355 sent_size: 916775 recv: 205.357600 Mbit/s send: 0.733420 Mbit/s
+14:00:50.303 [notice] 1454495450: recv_pkts: 178541 recv_size: 249957400 sent_pkts: 178541 sent_size: 892705 recv: 199.965920 Mbit/s send: 0.714164 Mbit/s
+

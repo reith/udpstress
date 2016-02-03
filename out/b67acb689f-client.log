@@ -1,0 +1,9 @@
+VMARGS_PATH="$PWD/client.args" ./_build/default/rel/udpstress/bin/udpstress foreground  -extra client 12000 13000
+
+13:59:31.295 [notice] 1454495371: recv_pkts: 177092 recv_size: 885460 sent_pkts: 177092 sent_size: 247928800 recv: 0.708368 Mbit/s send: 198.343040 Mbit/s
+13:59:41.312 [notice] 1454495381: recv_pkts: 196064 recv_size: 980320 sent_pkts: 196064 sent_size: 274489600 recv: 0.784256 Mbit/s send: 219.591680 Mbit/s
+13:59:51.320 [notice] 1454495391: recv_pkts: 195351 recv_size: 976755 sent_pkts: 195351 sent_size: 273491400 recv: 0.781404 Mbit/s send: 218.793120 Mbit/s
+14:00:01.324 [notice] 1454495401: recv_pkts: 203595 recv_size: 1017975 sent_pkts: 203595 sent_size: 285033000 recv: 0.814380 Mbit/s send: 228.026400 Mbit/s
+14:00:11.348 [notice] 1454495411: recv_pkts: 199017 recv_size: 995085 sent_pkts: 199017 sent_size: 278623800 recv: 0.796068 Mbit/s send: 222.899040 Mbit/s
+14:00:21.359 [notice] 1454495421: recv_pkts: 197990 recv_size: 989950 sent_pkts: 197990 sent_size: 277186000 recv: 0.791960 Mbit/s send: 221.748800 Mbit/s
+14:00:31.362 [notice] 1454495431: recv_pkts: 201881 recv_size: 1009405 sent_pkts: 201881 sent_size: 282633400 recv: 0.807524 Mbit/s send: 226.106720 Mbit/s
