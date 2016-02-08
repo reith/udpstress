@@ -27,11 +27,11 @@ start_link(Server, StartPort, EndPort)
 %%====================================================================
 
 init([Server, StartPort, EndPort]) ->
-  Clients = [
-   client:child_spec(Server, Port) || Port <- lists:seq(StartPort, EndPort)
-  ],
-  Report = maps:put(id, reporter, reporter:child_spec()),
-  {ok, { {one_for_one , 0, 1}, [ Report | Clients] } }.
+    lists:foreach(fun(X) ->
+			  client:start(#{port => X, addr => Server})
+		  end, lists:seq(StartPort, EndPort)),
+    Report = maps:put(id, reporter, reporter:child_spec()),
+    {ok, { {one_for_one , 0, 1}, [ Report ] } }.
 
 %%====================================================================
 %% Internal functions
