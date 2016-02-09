@@ -1,8 +1,10 @@
--module(client).
+-module(plain_client).
 
 %% API
 -export([
-	 start/1
+	 start_link/2,
+   start/1,
+   child_spec/2
 	]).
 
 -define(REPORT_INTERVAL, 1000).
@@ -53,10 +55,28 @@
 %%% API
 %%%===================================================================
 
+start_link(Name, Args) ->
+  Pid = spawn_link(fun() -> start_1(Args) end),
+  register(Name, Pid),
+  {ok, Pid}.
+
 start(Args) ->
-    spawn(fun() ->
-		  start_1(Args)
-	  end).
+  spawn(fun() -> start_1(Args) end).
+
+child_spec(Addr, Port) ->
+  ID = lists:flatten(io_lib:format("pc_~s_~b", [inet:ntoa(Addr), Port])),
+  #{
+     id => ID,
+     start => {?MODULE, start_link, [list_to_atom(ID),
+                                     #{port => Port, addr => Addr}]},
+     restart => permanent,
+     modules => [?MODULE],
+     type => worker
+  }.
+ 
+%%%===================================================================
+%%% Internal functions
+%%%===================================================================
 
 start_1(#{addr := Addr, port := PortNumber}) ->
     {ok, Socket} = gen_udp:open(0, [binary, {active, once}]),
@@ -86,4 +106,3 @@ ping(#state{socket = Socket, remote_addr = Addr, remote_port = Port,
 	    not_acked_pkts = NotAckeds} = State) ->
     gen_udp:send(Socket, Addr, Port, ?PKT_DATA),
     State#state{not_acked_pkts = NotAckeds + 1}.
-
