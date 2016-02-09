@@ -24,12 +24,12 @@ start_link(StartPort, EndPort) when is_integer(StartPort), is_integer(EndPort) -
 %%====================================================================
 
 init([StartPort, EndPort]) ->
-  Servers = [
-    server:child_spec(P) || P <- lists:seq(StartPort, EndPort)
-  ],
-  Report = maps:put(id, reporter, reporter:child_spec()),
-  lager:notice("servers are ~p", [Servers]),
-  {ok, { {one_for_one , 0, 1}, [Report | Servers] } }.
+    Servers = [
+	       server:child_spec(P) || P <- lists:seq(StartPort, EndPort)
+	      ],
+    Report = maps:put(id, reporter, reporter:child_spec()),
+    lager:notice("servers are ~p", [Servers]),
+    {ok, { {one_for_one , 0, 1}, [Report | Servers] } }.
 
 %%====================================================================
 %% Internal functions
