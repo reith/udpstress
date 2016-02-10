@@ -6,7 +6,7 @@
 -export([
      start_link/2,
      child_spec/0,
-     child_spec/2
+     child_spec/3
     ]).
 
 %% gen_server callbacks
@@ -60,7 +60,7 @@
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0>>).
 
 -record(state, {socket, remote_addr, remote_port, sent_pkts=0, recv_pkts=0,
-                sent_size=0, recv_size=0, not_acked_pkts=0}).
+                sent_size=0, recv_size=0, not_acked_pkts=0, send_interval}).
 
 %%%===================================================================
 %%% API
@@ -77,12 +77,13 @@ child_spec() ->
      type => worker
   }.
 
-child_spec(Addr, Port) ->
+child_spec(Addr, Port, Interval) ->
   ID = lists:flatten(io_lib:format("gc_~s_~b", [inet:ntoa(Addr), Port])),
   #{
      id => ID,
      start => {?MODULE, start_link, [list_to_atom(ID),
-                                     #{port => Port, addr => Addr}]},
+                                     #{port => Port, addr => Addr,
+                                       send_interval => Interval}]},
      restart => permanent,
      modules => [?MODULE],
      type => worker
@@ -92,11 +93,12 @@ child_spec(Addr, Port) ->
 %%% gen_server callbacks
 %%%===================================================================
 
-init(#{addr := Addr, port := PortNumber}) ->
+init(#{addr := Addr, port := PortNumber, send_interval := SendInterval}) ->
   {ok, Socket} = gen_udp:open(0, [binary, {active, once}]),
   erlang:send_after(100, self(), ping),
   erlang:send_after(?REPORT_INTERVAL, self(), report),
-  {ok, #state{socket = Socket, remote_addr = Addr, remote_port = PortNumber}}.
+  {ok, #state{socket = Socket, remote_addr = Addr, remote_port = PortNumber,
+              send_interval = SendInterval}}.
 
 handle_call(_Request, _From, State) ->
   Reply = ok,
@@ -113,14 +115,22 @@ handle_info(report, State = #state{sent_pkts = SentPkts, recv_pkts = RecvPkts,
                         not_acked_pkts=0}};
 handle_info(ping, State = #state{socket = Socket, remote_addr = Addr, remote_port = Port,
                                  sent_pkts = _SentPkts, sent_size = _SentSize,
-                                 not_acked_pkts = NotAckeds}) ->
+                                 not_acked_pkts = NotAckeds, send_interval = Interval}) ->
   gen_udp:send(Socket, Addr, Port, ?PKT_DATA),
+  if
+    Interval =/= undefined -> erlang:send_after(Interval, self(), ping);
+    true -> ok
+  end,
   {noreply, State#state{not_acked_pkts = NotAckeds + 1}};
 handle_info({udp, Socket, _FromIP, _FromPort, <<"ack", Size:16>>},
             State = #state{socket = Socket, recv_pkts = RecvPkts, recv_size = RecvSize,
-                           sent_pkts = SentPkts, sent_size = SentSize}) ->
+                           sent_pkts = SentPkts, sent_size = SentSize,
+                           send_interval = Interval}) ->
   inet:setopts(Socket, [{active, once}]),
-  self() ! ping,
+  if
+    Interval =:= undefined -> self() ! ping;
+    true -> ok
+  end,
   {noreply, State#state{sent_pkts = SentPkts + 1, sent_size = SentSize + Size,
                         recv_pkts = RecvPkts + 1,recv_size = RecvSize + 5}};
 handle_info(Info, State) ->

@@ -55,7 +55,6 @@ init(#{port := PortNumber}) ->
   {ok, Socket} = gen_udp:open(PortNumber, [binary, {active, once},
                                            {recbuf, 1048576},
                                            {sndbuf, 1048576}]),
-  lager:notice("listening on udp ~p~n", [PortNumber]),
   erlang:send_after(?REPORT_INTERVAL, self(), report),
   {ok, #state{socket = Socket}}.
 
