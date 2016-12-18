@@ -34,7 +34,10 @@ start_app_from_args([StartScriptAction | Rest]) when
   start_app_from_args(Rest);
 
 start_app_from_args([ClientType, Server, StartPort, EndPort])
-  when ClientType == "plain_client"; ClientType == "genserver_client"
+  when
+    ClientType == "plain_client";
+    ClientType == "genserver_client";
+    ClientType == "procket_client"
 ->
   start_app_from_args([ClientType, Server, "-i", undefined, StartPort, EndPort]);
 start_app_from_args([ClientType, Server, "-i", SendInterval, StartPort, EndPort]) ->
@@ -52,7 +55,10 @@ start_app_from_args([ClientType, Server, "-i", SendInterval, StartPort, EndPort]
                                     send_interval => if SendInterval =/= undefined -> list_to_integer(SendInterval) ; true -> SendInterval end
                                   });
 start_app_from_args([ServerType, StartPort, EndPort])
-  when ServerType == "plain_server"; ServerType == "genserver_server"
+  when
+    ServerType == "plain_server";
+    ServerType == "genserver_server";
+    ServerType == "procket_server"
 ->
   udpstress_server_sup:start_link(#{
                                     server_type => list_to_atom(ServerType),
@@ -60,7 +66,7 @@ start_app_from_args([ServerType, StartPort, EndPort])
                                     end_port => list_to_integer(EndPort)
                                   });
 start_app_from_args(Args) ->
-  lager:error("invalid invokation: ~p~n", [lists:flatten(Args)]),
-  lager:error("usage: <genserver_client | plain_client> [server_address] [-i send_interval] start_port end_port~n"),
-  lager:error("       <genserver_server | plain_server> start_port end_port~n"),
+  lager:error("invalid invocation: ~p~n", [lists:flatten(Args)]),
+  lager:error("usage: <genserver_client | plain_client | procket_client> [server_address] [-i send_interval] start_port end_port~n"),
+  lager:error("       <genserver_server | plain_server | procket_server> start_port end_port~n"),
   init:stop().

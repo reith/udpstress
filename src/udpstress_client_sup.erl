@@ -24,12 +24,6 @@ start_link(SupArgs) ->
 %% Supervisor callbacks
 %%====================================================================
 
-% init([plain_client, ServerAddr, StartPort, EndPort]) ->
-  % lists:foreach(fun(X) ->
-                  % plain_client:start(#{port => X, addr => ServerAddr})
-                % end, lists:seq(StartPort, EndPort)),
-  % Report = maps:put(id, reporter, reporter:child_spec()),
-  % {ok, { {one_for_one, 0, 1}, [Report] } };
 init(#{
         client_type   := Client,
         server_addr   := ServerAddr,
