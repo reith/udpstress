@@ -33,7 +33,7 @@ init(#{
      }) when is_integer(StartPort), is_integer(EndPort)
 ->
   Clients = [
-    Client:child_spec(ServerAddr, Port, Interval) || Port <- lists:seq(StartPort, EndPort)
+    udpstress_client:child_spec(Client, ServerAddr, Port, Interval) || Port <- lists:seq(StartPort, EndPort)
   ],
   Report = maps:put(id, reporter, reporter:child_spec()),
   {ok, { {one_for_one , 0, 1}, [ Report | Clients ] } }.

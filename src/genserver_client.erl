@@ -70,12 +70,8 @@ handle_call(_Request, _From, State) ->
 handle_cast(_Msg, State) ->
   {noreply, State}.
 
-handle_info(report, State = #state{sent_pkts = SentPkts, recv_pkts = RecvPkts,
-                                   sent_size = SentSize, recv_size = RecvSize}) ->
-  reporter:collect_report(RecvPkts, RecvSize, SentPkts, SentSize),
-  erlang:send_after(?REPORT_INTERVAL, self(), report),
-  {noreply, State#state{sent_pkts=0, sent_size=0, recv_pkts=0, recv_size=0,
-                        not_acked_pkts=0}};
+handle_info(report, State = #state{}) ->
+  {noreply, udpstress_client:report(State)};
 handle_info(ping, State = #state{socket = Socket, remote_addr = Addr, remote_port = Port,
                                  sent_pkts = _SentPkts, sent_size = _SentSize,
                                  not_acked_pkts = NotAckeds, send_interval = Interval}) ->
