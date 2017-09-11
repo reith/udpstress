@@ -12,7 +12,7 @@
 %%%===================================================================
 
 -callback
-start_link(Args :: #{port := _PortNumber}) ->
+start_link(Args :: #{port => _PortNumber}) ->
   {ok, Pid :: pid()}.
 
 -callback

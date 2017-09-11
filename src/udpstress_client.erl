@@ -13,7 +13,7 @@
 %%%===================================================================
 
 -callback
-start_link(Name :: atom(), Args :: #{port := _PortNumber :: integer(), addr := Addr :: inet:hostanme()}) ->
+start_link(Name :: atom(), Args :: #{port => _PortNumber :: integer(), addr => Addr :: inet:hostanme()}) ->
   {ok, Pid :: pid()}.
 
 -callback
