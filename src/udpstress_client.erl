@@ -55,8 +55,8 @@ send(Module, State) ->
 -spec report(State :: #state{}) -> Result :: #state{}.
 report(#state{recv_pkts = RecvPkts, recv_size = RecvSize,
               sent_pkts = SentPkts, sent_size = SentSize,
-              acked_pkts = _AckedPkts, acked_size = _AckedSize} = State) ->
-  reporter:collect_report(RecvPkts, RecvSize, SentPkts, SentSize),
+              acked_pkts = AckedPkts, acked_size = AckedSize} = State) ->
+  reporter:collect_report(RecvPkts, RecvSize, SentPkts, SentSize, AckedPkts, AckedSize),
   erlang:send_after(?REPORT_INTERVAL, self(), report),
   State#state{sent_pkts=0, sent_size=0, recv_pkts=0, recv_size=0,
               acked_pkts=0, acked_size=0}.
