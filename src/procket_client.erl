@@ -10,7 +10,7 @@
 %%% udpstress_client behaviour
 %%%===================================================================
 
--export([ start_link/2, send_data/2 ]).
+-export([ start_link/2, send_data/3 ]).
 
 %%%===================================================================
 %%% API
@@ -21,10 +21,10 @@ start_link(Name, Args) ->
   register(Name, Pid),
   {ok, Pid}.
 
-send_data(Data, #state{socket = Socket, remote_addr = Addr, remote_port = Port,
-                       not_acked_pkts = NotAckeds} = State) ->
+send_data(Data, Size, #state{socket = Socket, remote_addr = Addr, remote_port = Port,
+                       sent_pkts = SentPkts, sent_size = SentSize} = State) ->
     gen_udp:send(Socket, Addr, Port, Data),
-    State#state{not_acked_pkts = NotAckeds + 1}.
+    State#state{sent_pkts = SentPkts + 1, sent_size = SentSize + Size}.
 
 %%%===================================================================
 %%% Internal functions
@@ -45,11 +45,11 @@ start_1(Args = #{addr := Addr, port := PortNumber}) ->
   end.
 
 loop(#state{socket = Socket, recv_pkts = RecvPkts, recv_size = RecvSize,
-	          sent_pkts = SentPkts, sent_size = SentSize} = State) ->
+	          acked_pkts = AckedPkts, acked_size = AckedSize} = State) ->
   receive
     {udp, Socket, _FromIP, _FromPort, <<"ack", Size:16>>} ->
       inet:setopts(Socket, [{active, once}]),
-      NewState = State#state{sent_pkts = SentPkts + 1, sent_size = SentSize + Size,
+      NewState = State#state{acked_pkts = AckedPkts + 1, acked_size = AckedSize + Size,
                              recv_pkts = RecvPkts + 1, recv_size = RecvSize + 5},
       loop(case State#state.send_interval of
             undefined ->udpstress_client:send(?MODULE, NewState);

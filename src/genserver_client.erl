@@ -20,10 +20,11 @@
 -define(SERVER, ?MODULE).
 -define(REPORT_INTERVAL, 1000).
 
--define(PKT_DATA, <<0:(8*1472)>>).
+-define(PKT_SIZE, 1472).
+-define(PKT_DATA, <<0:(8*?PKT_SIZE)>>).
 
 -record(state, {socket, remote_addr, remote_port, sent_pkts=0, recv_pkts=0,
-                sent_size=0, recv_size=0, not_acked_pkts=0, send_interval}).
+                sent_size=0, recv_size=0, acked_pkts=0, acked_size=0, send_interval}).
 
 %%%===================================================================
 %%% API
@@ -73,24 +74,24 @@ handle_cast(_Msg, State) ->
 handle_info(report, State = #state{}) ->
   {noreply, udpstress_client:report(State)};
 handle_info(ping, State = #state{socket = Socket, remote_addr = Addr, remote_port = Port,
-                                 sent_pkts = _SentPkts, sent_size = _SentSize,
-                                 not_acked_pkts = NotAckeds, send_interval = Interval}) ->
+                                 sent_pkts = SentPkts, sent_size = SentSize,
+                                 send_interval = Interval}) ->
   gen_udp:send(Socket, Addr, Port, ?PKT_DATA),
   if
     Interval =/= undefined -> erlang:send_after(Interval, self(), ping);
     true -> ok
   end,
-  {noreply, State#state{not_acked_pkts = NotAckeds + 1}};
+  {noreply, State#state{sent_pkts = SentPkts + 1, sent_size = SentSize + ?PKT_SIZE}};
 handle_info({udp, Socket, _FromIP, _FromPort, <<"ack", Size:16>>},
             State = #state{socket = Socket, recv_pkts = RecvPkts, recv_size = RecvSize,
-                           sent_pkts = SentPkts, sent_size = SentSize,
+                           acked_pkts = AckedPkts, acked_size = AckedSize,
                            send_interval = Interval}) ->
   inet:setopts(Socket, [{active, once}]),
   if
     Interval =:= undefined -> self() ! ping;
     true -> ok
   end,
-  {noreply, State#state{sent_pkts = SentPkts + 1, sent_size = SentSize + Size,
+  {noreply, State#state{acked_pkts = AckedPkts + 1, acked_size = AckedSize + Size,
                         recv_pkts = RecvPkts + 1,recv_size = RecvSize + 5}};
 handle_info(Info, State) ->
   lager:warning("received unhandled info ~p", [Info]),
