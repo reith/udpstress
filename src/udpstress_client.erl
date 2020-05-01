@@ -3,7 +3,8 @@
 %% API
 -export([child_spec/1, child_spec/4, report/1, send/2]).
 
--define(PKT_DATA, <<0:(8*1472)>>).
+-define(PKT_SIZE, 1472).
+-define(PKT_DATA, <<0:(8*?PKT_SIZE)>>).
 -define(REPORT_INTERVAL, 1000).
 
 -include("udpstress_client.hrl").
@@ -17,7 +18,7 @@ start_link(Name :: atom(), Args :: #{port => _PortNumber :: integer(), addr => A
   {ok, Pid :: pid()}.
 
 -callback
-send_data(Data :: binary(), State :: #state{}) ->
+send_data(Data :: binary(), Size :: integer(), State :: #state{}) ->
   Result :: #state{}.
 
 %%%===================================================================
@@ -48,16 +49,17 @@ child_spec(Module) ->
 
 -spec send(Module :: atom(), State :: #state{}) -> Result :: #state{}.
 send(Module, State) ->
-  Module:send_data(?PKT_DATA, State).
+  Module:send_data(?PKT_DATA, ?PKT_SIZE, State).
 
 
 -spec report(State :: #state{}) -> Result :: #state{}.
-report(#state{recv_pkts = RecvPkts, recv_size = RecvSize, sent_pkts = SentPkts,
-              sent_size = SentSize} = State) ->
-  reporter:collect_report(RecvPkts, RecvSize, SentPkts, SentSize),
+report(#state{recv_pkts = RecvPkts, recv_size = RecvSize,
+              sent_pkts = SentPkts, sent_size = SentSize,
+              acked_pkts = AckedPkts, acked_size = AckedSize} = State) ->
+  reporter:collect_report(RecvPkts, RecvSize, SentPkts, SentSize, AckedPkts, AckedSize),
   erlang:send_after(?REPORT_INTERVAL, self(), report),
   State#state{sent_pkts=0, sent_size=0, recv_pkts=0, recv_size=0,
-              not_acked_pkts=0}.
+              acked_pkts=0, acked_size=0}.
 
 %%%===================================================================
 %%% Internal functions
